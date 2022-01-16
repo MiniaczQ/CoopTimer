@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 import os
 import json
 import signal
@@ -6,6 +7,7 @@ import asyncio
 import time
 import socket
 import re
+from typing import Callable
 
 
 class TimerClientInstance:
@@ -153,25 +155,33 @@ class TimerServer:
         except:
             pass
 
+class LineMatch(ABC):
+    @abstractmethod
+    def check(self, string: str) -> None: ...
 
-class LineChecker:
-    def __init__(self, func, message: str):
-        self.func = func
+class LineChecker(LineMatch):
+    callback: Callable[[], None]
+    message: str
+
+    def __init__(self, callback: Callable[[], None], message: str) -> None:
+        self.callback = callback
         self.message = message
 
-    def check(self, string: str):
+    def check(self, string: str) -> None:
         if self.message in string:
-            self.func()
+            self.callback()
 
+class RELineChecker(LineMatch):
+    callback: Callable[[], None]
+    pattern: str
 
-class RELineChecker(LineChecker):
-    def __init__(self, func, reg: str):
-        self.func = func
-        self.pattern = re.compile(reg)
+    def __init__(self, callback: Callable[[], None], pattern_str: str) -> None:
+        self.callback = callback
+        self.pattern = re.compile(pattern_str)
 
-    def check(self, string: str):
+    def check(self, string: str) -> None:
         if self.pattern.match(string):
-            self.func()
+            self.callback()
 
 
 class LogsTracker:
