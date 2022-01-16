@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 import os
 import json
 import signal
@@ -6,10 +5,8 @@ from threading import Thread
 import asyncio
 import time
 import socket
-import re
-from typing import Callable
 
-from server.LineChecker import LineCheckBase, LineChecker
+from server.LineChecker import LineChecker
 from server.LogsTracker import LogsTracker
 
 
