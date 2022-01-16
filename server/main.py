@@ -3,9 +3,9 @@ import json
 import os
 import signal
 
-from server.LineChecker import LineChecker
-from server.LogsTracker import LogsTracker
-from server.TimerServer import TimerServer
+from LineChecker import LineChecker
+from LogsTracker import LogsTracker
+from TimerServer import TimerServer
 
 
 async def main() -> None:

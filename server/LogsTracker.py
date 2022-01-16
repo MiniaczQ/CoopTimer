@@ -2,7 +2,7 @@ import os
 from threading import Thread
 import time
 
-from server.LineChecker import LineCheckBase
+from LineChecker import LineCheckBase
 
 
 class LogsTracker:

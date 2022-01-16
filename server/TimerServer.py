@@ -1,7 +1,7 @@
 from threading import Thread
 import time
 import socket
-from server.ClientHandler import ClientHandler
+from ClientHandler import ClientHandler
 
 
 class TimerServer:
