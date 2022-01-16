@@ -6,24 +6,24 @@ from server.LineChecker import LineCheckBase
 
 
 class LogsTracker:
-    def __init__(self, path):
+    def __init__(self, path) -> None:
         self.lastLine = 0
         self.lastMTime = 0
         self.path = path
         self.running = False
         self.lineCheckers = set([])
 
-    def addChecker(self, lineChecker: LineCheckBase):
+    def addChecker(self, lineChecker: LineCheckBase) -> None:
         self.lineCheckers.add(lineChecker)
 
-    def start(self):
+    def start(self) -> None:
         self.running = True
         Thread(target=self._listenThread).start()
 
-    def stop(self):
+    def stop(self) -> None:
         self.running = False
 
-    def _listenThread(self):
+    def _listenThread(self) -> None:
         while self.running:
             try:
                 time.sleep(0.05)
@@ -35,7 +35,7 @@ class LogsTracker:
             except:
                 pass
 
-    def _checkFile(self):
+    def _checkFile(self) -> None:
         with open(self.path, "r") as logsFile:
             content = logsFile.readlines()
             logsFile.close()

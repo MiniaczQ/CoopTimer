@@ -3,7 +3,7 @@ from threading import Thread
 
 
 class ClientHandler:
-    def __init__(self, parent, c, addr):
+    def __init__(self, parent, c, addr) -> None:
         self.parent = parent
         self.clientSocket: socket.socket = c
         self.addr = addr
@@ -11,7 +11,7 @@ class ClientHandler:
         self.thread = Thread(target=self.loop)
         self.thread.start()
 
-    def loop(self):
+    def loop(self) -> None:
         try:
             while self.running:
                 msg = self.clientSocket.recv(1024).decode()
@@ -27,15 +27,15 @@ class ClientHandler:
             pass
         self.detachFromClient()
 
-    def detachFromClient(self):
+    def detachFromClient(self) -> None:
         if self.parent is not None:
             self.parent.removeClient(self)
             self.parent = None
 
-    def send(self, msg):
+    def send(self, msg: str) -> None:
         self.clientSocket.send(msg.encode())
 
-    def stop(self):
+    def stop(self) -> None:
         self.running = False
         self.send("end")
         try:

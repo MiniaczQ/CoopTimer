@@ -8,7 +8,7 @@ from server.LogsTracker import LogsTracker
 from server.TimerServer import TimerServer
 
 
-async def main():
+async def main() -> None:
     jsonDict = {}
     if os.path.isfile("coop_timer_server.json"):
         with open("coop_timer_server.json", "r") as jsonFile:
