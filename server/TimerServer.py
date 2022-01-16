@@ -5,52 +5,10 @@ from threading import Thread
 import asyncio
 import time
 import socket
+from server.ClientHandler import ClientHandler
 
 from server.LineChecker import LineChecker
 from server.LogsTracker import LogsTracker
-
-
-class TimerClientInstance:
-    def __init__(self, parent, c, addr):
-        self.parent = parent
-        self.clientSocket: socket.socket = c
-        self.addr = addr
-        self.running = True
-        self.thread = Thread(target=self.loop)
-        self.thread.start()
-
-    def loop(self):
-        try:
-            while self.running:
-                msg = self.clientSocket.recv(1024).decode()
-                if msg == "quit":
-                    self.running = False
-                    self.send("end")
-                elif self.parent.password is not None:
-                    if msg == self.parent.password+"pause":
-                        self.parent.togglePause()
-                    elif msg == self.parent.password+"reset":
-                        self.parent.resetTimer()
-        except:
-            pass
-        self.detachFromClient()
-
-    def detachFromClient(self):
-        if self.parent is not None:
-            self.parent.removeClient(self)
-            self.parent = None
-
-    def send(self, msg):
-        self.clientSocket.send(msg.encode())
-
-    def stop(self):
-        self.running = False
-        self.send("end")
-        try:
-            self.clientSocket.close()
-        except:
-            pass
-        self.detachFromClient()
 
 
 class TimerServer:
@@ -122,7 +80,7 @@ class TimerServer:
         while self.running:
             try:
                 c, addr = self.socket.accept()
-                client = TimerClientInstance(self, c, addr)
+                client = ClientHandler(self, c, addr)
                 if self.running:
                     self.clients.append(client)
                     print("[Timer Server] Client '"+str(addr)+"' connected.")
