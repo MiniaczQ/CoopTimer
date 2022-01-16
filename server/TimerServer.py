@@ -1,6 +1,8 @@
 import os
 import json
+import signal
 from threading import Thread
+import asyncio
 import time
 import socket
 import re
@@ -217,7 +219,7 @@ class LogsTracker:
         self.lastLine = len(content)
 
 
-if __name__ == "__main__":
+async def main():
     jsonDict = {}
     if os.path.isfile("coop_timer_server.json"):
         with open("coop_timer_server.json", "r") as jsonFile:
@@ -236,8 +238,18 @@ if __name__ == "__main__":
     ts.start()
     lt.start()
 
-    while input() != "stop":
-        pass
+    stop_event = asyncio.Event()
+
+    def handle_interrupt(sig, frame):
+        stop_event.set()
+
+    signal.signal(signal.SIGTERM, handle_interrupt)
+    signal.signal(signal.SIGINT, handle_interrupt)
+
+    await stop_event.wait()
 
     lt.stop()
     ts.kill()
+
+if __name__ == "__main__":
+    asyncio.run(main())
