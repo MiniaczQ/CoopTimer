@@ -21,7 +21,7 @@ class LineChecker(LineCheckBase):
 
 class RELineChecker(LineCheckBase):
     callback: Callable[[], None]
-    pattern: str
+    pattern: re.Pattern
 
     def __init__(self, callback: Callable[[], None], pattern_str: str) -> None:
         self.callback = callback
