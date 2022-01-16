@@ -1,14 +1,7 @@
-import os
-import json
-import signal
 from threading import Thread
-import asyncio
 import time
 import socket
 from server.ClientHandler import ClientHandler
-
-from server.LineChecker import LineChecker
-from server.LogsTracker import LogsTracker
 
 
 class TimerServer:
@@ -112,38 +105,3 @@ class TimerServer:
             print("[Timer Server] Client '"+str(client.addr)+"' disconnected.")
         except:
             pass
-
-async def main():
-    jsonDict = {}
-    if os.path.isfile("coop_timer_server.json"):
-        with open("coop_timer_server.json", "r") as jsonFile:
-            jsonDict = json.load(jsonFile)
-            jsonFile.close()
-
-    path = os.path.join(jsonDict.get("logs", "logs"), "latest.log")
-
-    lt = LogsTracker(path)
-    ts = TimerServer(jsonDict.get("address", "127.0.0.1"), jsonDict.get(
-        "port", 25564), jsonDict.get("password", None))
-
-    lt.addChecker(LineChecker(ts.startTimer, "Set the time to 0"))
-    lt.addChecker(LineChecker(ts.resetTimer, "Stopping the server"))
-
-    ts.start()
-    lt.start()
-
-    stop_event = asyncio.Event()
-
-    def handle_interrupt(sig, frame):
-        stop_event.set()
-
-    signal.signal(signal.SIGTERM, handle_interrupt)
-    signal.signal(signal.SIGINT, handle_interrupt)
-
-    await stop_event.wait()
-
-    lt.stop()
-    ts.kill()
-
-if __name__ == "__main__":
-    asyncio.run(main())
