@@ -29,8 +29,12 @@ class TimerClientInstance:
                         self.parent.resetTimer()
         except:
             pass
-        self.parent.removeClient(self)
-        self.parent = None
+        self.detachFromClient()
+
+    def detachFromClient(self):
+        if self.parent is not None:
+            self.parent.removeClient(self)
+            self.parent = None
 
     def send(self, msg):
         self.clientSocket.send(msg.encode())
@@ -38,8 +42,11 @@ class TimerClientInstance:
     def stop(self):
         self.running = False
         self.send("end")
-        self.clientSocket.close()
-        self.parent = None
+        try:
+            self.clientSocket.close()
+        except:
+            pass
+        self.detachFromClient()
 
 
 class TimerServer:
@@ -62,6 +69,8 @@ class TimerServer:
 
             self.socket.bind((self.addr, self.port))
             self.socket.listen(50)
+
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
             self.acceptConnectionsThread = Thread(
                 target=self.acceptConnectionsLoop)
@@ -136,8 +145,11 @@ class TimerServer:
         self.socket.close()
 
     def removeClient(self, client):
-        print("[Timer Server] Client '"+str(client.addr)+"' disconnected.")
-        self.clients.remove(client)
+        try:
+            self.clients.remove(client)
+            print("[Timer Server] Client '"+str(client.addr)+"' disconnected.")
+        except:
+            pass
 
 
 class LineChecker:
@@ -180,12 +192,15 @@ class LogsTracker:
 
     def _listenThread(self):
         while self.running:
-            time.sleep(0.05)
-            if os.path.isfile(self.path):
-                mTime = os.path.getmtime(self.path)
-                if mTime != self.lastMTime:
-                    self.lastMTime = mTime
-                    self._checkFile()
+            try:
+                time.sleep(0.05)
+                if os.path.isfile(self.path):
+                    mTime = os.path.getmtime(self.path)
+                    if mTime != self.lastMTime:
+                        self.lastMTime = mTime
+                        self._checkFile()
+            except:
+                pass
 
     def _checkFile(self):
         with open(self.path, "r") as logsFile:
@@ -196,6 +211,7 @@ class LogsTracker:
             self.lastLine = 0
 
         for line in content[self.lastLine:]:
+            print(line)
             for lineChecker in self.lineCheckers:
                 lineChecker.check(line)
         self.lastLine = len(content)
